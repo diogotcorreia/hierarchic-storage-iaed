@@ -18,11 +18,64 @@
 #define DELETE_CMD "delete"
 #define DELETE_DESC "Apaga um caminho e todos os subcaminhos."
 
+#define WHITESPACE " \t\n"
+#define PATH_SEPARATOR "/"
+
 #define HELP_COMMAND_FORMAT "%s: %s\n"
 
-typedef struct {
-} storage;
+struct file;
 
-int handle_command(/*storage *global_store*/);
+typedef struct node {
+	struct node* next;
+	struct node* prev;
+	struct file* value;
+} node_t;
+
+typedef struct list {
+	node_t* first;
+	node_t* last;
+} list_t;
+
+typedef struct file {
+	struct file* parent;
+	char* name;
+	char* value;
+	list_t* children_by_creation;
+	/* TODO add AVL binary tree */
+} file_t;
+
+typedef struct {
+	file_t* root_file;
+} storage_t;
+
+/* proj2.c */
+
+int handle_command(storage_t* storage);
 
 void handle_help_command();
+
+void handle_set_command(storage_t* storage, char* arguments);
+
+/* paths.c */
+
+void add_path_recursively(storage_t* storage, char* path, char* value);
+
+file_t* init_file(file_t* parent, char* name);
+
+void set_file_value(file_t* file, char* value);
+
+list_t* get_file_children_by_creation(file_t* parent);
+
+void destroy_file(file_t* file);
+
+list_t* init_list();
+
+void insert_list(list_t* list, file_t* node);
+
+void destroy_list(list_t* list);
+
+/* utils.c */
+
+short is_whitespace(char c);
+
+char* trim_whitespace(char* str);

@@ -7,16 +7,20 @@
 #include <string.h>
 
 int main() {
-	/*storage global_store = {0};*/
+	storage_t *storage = (storage_t *)malloc(sizeof(storage_t));
+	storage->root_file = init_file(NULL, NULL);
 
 	/* execute program until the user sends the 'quit' command */
-	while (handle_command(/*&global_store*/)) {
+	while (handle_command(storage)) {
 	}
+
+	destroy_file(storage->root_file);
+	free(storage);
 
 	return 0;
 }
 
-int handle_command(/*storage *global_store*/) {
+int handle_command(storage_t *storage) {
 	char *command = malloc(sizeof(char) * MAX_COMMAND_SIZE);
 	char *command_name;
 	short result = 0;
@@ -24,10 +28,13 @@ int handle_command(/*storage *global_store*/) {
 	command = fgets(command, MAX_COMMAND_SIZE, stdin);
 	if (command == NULL) return 0; /* EOF or error while reading from stdin */
 
-	command_name = strtok(command, " \t\n");
+	command_name = strtok(command, WHITESPACE);
 
 	if (strcmp(command_name, HELP_CMD) == 0) {
 		handle_help_command();
+		result = 1;
+	} else if (strcmp(command_name, SET_CMD) == 0) {
+		handle_set_command(storage, command + strlen(command_name) + 1);
 		result = 1;
 	}
 
@@ -46,4 +53,16 @@ void handle_help_command() {
 	printf(HELP_COMMAND_FORMAT, LIST_CMD, LIST_DESC);
 	printf(HELP_COMMAND_FORMAT, SEARCH_CMD, SEARCH_DESC);
 	printf(HELP_COMMAND_FORMAT, DELETE_CMD, DELETE_DESC);
+}
+
+void handle_set_command(storage_t *storage, char *arguments) {
+	char *path;
+	char *value;
+
+	path = strtok(arguments, WHITESPACE);
+	arguments += strlen(path) + 1; /* skip to next command argument */
+
+	value = trim_whitespace(arguments);
+
+	add_path_recursively(storage, path, value);
 }

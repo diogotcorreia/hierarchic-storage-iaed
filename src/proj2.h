@@ -33,6 +33,13 @@ typedef struct node {
 	struct file* value;
 } node_t;
 
+typedef struct link {
+	struct file* value;
+	struct link* left;
+	struct link* right;
+	int height;
+} link_t;
+
 typedef struct list {
 	node_t* first;
 	node_t* last;
@@ -43,14 +50,16 @@ typedef struct file {
 	char* name;
 	char* value;
 	list_t* children_by_creation;
-	/* TODO add AVL binary tree */
+	link_t* children_tree;
 } file_t;
 
 typedef struct {
 	file_t* root_file;
 } storage_t;
 
+/***********/
 /* proj2.c */
+/***********/
 
 int handle_command(storage_t* storage);
 
@@ -64,9 +73,17 @@ void print_file_recursively(file_t* file);
 
 void print_file_path(file_t* file);
 
+void handle_find_command(storage_t* storage, char* arguments);
+
+/***********/
 /* paths.c */
+/***********/
 
 void add_path_recursively(storage_t* storage, char* path, char* value);
+
+file_t* get_file_by_path(storage_t* storage, char* path);
+
+/* files */
 
 file_t* init_file(file_t* parent, char* name);
 
@@ -78,13 +95,39 @@ file_t* get_child_by_name(file_t* parent, char* name);
 
 void destroy_file(file_t* file);
 
+/* linked lists */
+
 list_t* init_list();
 
-void insert_list(list_t* list, file_t* node);
+void insert_list(list_t* list, file_t* file);
 
 void destroy_list(list_t* list);
 
+/* trees */
+
+link_t* init_link(file_t* file, link_t* left, link_t* right);
+
+int height(link_t* link);
+
+link_t* rotL(link_t* link);
+
+link_t* rotR(link_t* link);
+
+link_t* rotLR(link_t* link);
+
+link_t* rotRL(link_t* link);
+
+int balance_factor(link_t* link);
+
+link_t* balance(link_t* link);
+
+link_t* insert_tree(link_t* link, file_t* file);
+
+void destroy_tree(link_t* link);
+
+/***********/
 /* utils.c */
+/***********/
 
 short is_whitespace(char c);
 

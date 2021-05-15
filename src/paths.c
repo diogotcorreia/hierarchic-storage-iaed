@@ -19,8 +19,9 @@ void add_path_recursively(storage_t* storage, char* path, char* value) {
 			current_file = init_file(parent_file, name);
 			parent_children = get_file_children_by_creation(parent_file);
 			insert_list(parent_children, current_file);
+			parent_file->children_tree =
+				insert_tree(parent_file->children_tree, current_file);
 		}
-		/* TODO insert into binary tree */
 		parent_file = current_file;
 
 		name = strtok(NULL, PATH_SEPARATOR);
@@ -36,6 +37,7 @@ file_t* init_file(file_t* parent, char* name) {
 
 	new_file->parent = parent;
 	new_file->children_by_creation = NULL;
+	new_file->children_tree = NULL;
 	new_file->value = NULL;
 
 	if (name != NULL) {
@@ -80,6 +82,9 @@ file_t* get_child_by_name(file_t* parent, char* name) {
 void destroy_file(file_t* file) {
 	if (file->name != NULL) free(file->name);
 	if (file->value != NULL) free(file->value);
+	if (file->children_tree != NULL) {
+		destroy_tree(file->children_tree);
+	}
 	if (file->children_by_creation != NULL) {
 		destroy_list(file->children_by_creation);
 	}
@@ -123,4 +128,115 @@ void destroy_list(list_t* list) {
 	}
 
 	free(list);
+}
+
+/* AVL Tree */
+
+link_t* init_link(file_t* file, link_t* left, link_t* right) {
+	link_t* new_link = (link_t*)malloc(sizeof(link_t));
+
+	new_link->value = file;
+	new_link->left = left;
+	new_link->right = right;
+	new_link->height = 1;
+
+	return new_link;
+}
+
+int height(link_t* link) {
+	if (link == NULL) return 0;
+	return link->height;
+}
+
+link_t* rotL(link_t* link) {
+	int l_left, l_right, x_left, x_right;
+	link_t* x = link->right;
+	link->right = x->left;
+	x->left = link;
+
+	l_left = height(link->left);
+	l_right = height(link->right);
+	link->height = l_left > l_right ? l_left + 1 : l_right + 1;
+
+	x_left = height(x->left);
+	x_right = height(x->right);
+	x->height = x_left > x_right ? x_left + 1 : x_right + 1;
+
+	return x;
+}
+
+link_t* rotR(link_t* link) {
+	int l_left, l_right, x_left, x_right;
+	link_t* x = link->left;
+	link->left = x->right;
+	x->right = link;
+
+	l_left = height(link->left);
+	l_right = height(link->right);
+	link->height = l_left > l_right ? l_left + 1 : l_right + 1;
+
+	x_left = height(x->left);
+	x_right = height(x->right);
+	x->height = x_left > x_right ? x_left + 1 : x_right + 1;
+
+	return x;
+}
+
+link_t* rotLR(link_t* link) {
+	if (link == NULL) return link;
+	link->left = rotL(link->left);
+	return rotR(link);
+}
+
+link_t* rotRL(link_t* link) {
+	if (link == NULL) return link;
+	link->right = rotR(link->right);
+	return rotL(link);
+}
+
+int balance_factor(link_t* link) {
+	if (link == NULL) return 0;
+	return height(link->left) - height(link->right);
+}
+
+link_t* balance(link_t* link) {
+	int bal_factor, l_left, l_right;
+	if (link == NULL) return link;
+	bal_factor = balance_factor(link);
+	if (bal_factor > 1) {
+		if (balance_factor(link->left) >= 0)
+			link = rotR(link);
+		else
+			link = rotLR(link);
+	} else if (bal_factor < -1) {
+		if (balance_factor(link->right) <= 0)
+			link = rotL(link);
+		else
+			link = rotRL(link);
+	} else {
+		l_left = height(link->left);
+		l_right = height(link->right);
+		link->height = l_left > l_right ? l_left + 1 : l_right + 1;
+	}
+	return link;
+}
+
+link_t* insert_tree(link_t* link, file_t* file) {
+	if (link == NULL) return init_link(file, NULL, NULL);
+
+	if (strcmp(file->name, link->value->name) < 0)
+		link->left = insert_tree(link->left, file);
+	else
+		link->right = insert_tree(link->right, file);
+	link = balance(link);
+	return link;
+}
+
+void destroy_tree(link_t* link) {
+	if (link == NULL) return;
+	destroy_tree(link->left);
+	destroy_tree(link->right);
+
+	/* no need to free the value since that's handled in the linked list */
+	free(link);
 }

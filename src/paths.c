@@ -226,7 +226,7 @@ link_t* balance(link_t* link) {
 link_t* insert_tree(link_t* link, file_t* file) {
 	if (link == NULL) return init_link(file, NULL, NULL);
 
-	if (strcmp(link->value->name, file->name) < 0)
+	if (strcmp(file->name, link->value->name) < 0)
 		link->left = insert_tree(link->left, file);
 	else
 		link->right = insert_tree(link->right, file);
@@ -238,7 +238,7 @@ file_t* get_link_by_value(link_t* link, char* value) {
 	int cmp;
 	if (link == NULL) return NULL;
 
-	cmp = strcmp(link->value->name, value);
+	cmp = strcmp(value, link->value->name);
 	if (cmp == 0) {
 		return link->value;
 	} else if (cmp < 0) {

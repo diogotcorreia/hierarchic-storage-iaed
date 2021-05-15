@@ -126,6 +126,8 @@ link_t* balance(link_t* link);
 
 link_t* insert_tree(link_t* link, file_t* file);
 
+file_t* get_link_by_value(link_t* link, char* value);
+
 void destroy_tree(link_t* link);
 
 /***********/

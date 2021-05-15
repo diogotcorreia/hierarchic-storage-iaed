@@ -63,20 +63,7 @@ list_t* get_file_children_by_creation(file_t* parent) {
 }
 
 file_t* get_child_by_name(file_t* parent, char* name) {
-	/* TODO in the future, use the binary tree for better performance */
-	file_t* result = NULL;
-
-	if (parent->children_by_creation != NULL) {
-		node_t* aux = parent->children_by_creation->first;
-
-		while (aux != NULL && result == NULL) {
-			if (strcmp(aux->value->name, name) == 0) result = aux->value;
-
-			aux = aux->next;
-		}
-	}
-
-	return result;
+	return get_link_by_value(parent->children_tree, name);
 }
 
 void destroy_file(file_t* file) {
@@ -224,12 +211,26 @@ link_t* balance(link_t* link) {
 link_t* insert_tree(link_t* link, file_t* file) {
 	if (link == NULL) return init_link(file, NULL, NULL);
 
-	if (strcmp(file->name, link->value->name) < 0)
+	if (strcmp(link->value->name, file->name) < 0)
 		link->left = insert_tree(link->left, file);
 	else
 		link->right = insert_tree(link->right, file);
 	link = balance(link);
 	return link;
+}
+
+file_t* get_link_by_value(link_t* link, char* value) {
+	int cmp;
+	if (link == NULL) return NULL;
+
+	cmp = strcmp(link->value->name, value);
+	if (cmp == 0) {
+		return link->value;
+	} else if (cmp < 0) {
+		return get_link_by_value(link->left, value);
+	} else {
+		return get_link_by_value(link->right, value);
+	}
 }
 
 void destroy_tree(link_t* link) {

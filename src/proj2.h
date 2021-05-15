@@ -28,9 +28,11 @@
 #define PATH_PRINT_FORMAT "/%s"
 #define PATH_VALUE_FORMAT " %s\n"
 #define FIND_FORMAT "%s\n"
+#define LIST_FORMAT "%s\n"
 
 #define FIND_ERR_FILE_NOT_FOUND "not found\n"
 #define FIND_ERR_FILE_EMPTY "no data\n"
+#define LIST_ERR_PATH_NOT_FOUND "not found\n"
 
 struct file;
 
@@ -81,6 +83,10 @@ void print_file_recursively(file_t* file);
 void print_file_path(file_t* file);
 
 void handle_find_command(storage_t* storage, char* arguments);
+
+void handle_list_command(storage_t* storage, char* arguments);
+
+void print_file_tree(link_t* link);
 
 /***********/
 /* paths.c */

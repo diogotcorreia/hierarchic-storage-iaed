@@ -43,6 +43,9 @@ int handle_command(storage_t *storage) {
 		} else if (strcmp(command_name, FIND_CMD) == 0) {
 			handle_find_command(storage, command + strlen(command_name) + 1);
 			result = 1;
+		} else if (strcmp(command_name, LIST_CMD) == 0) {
+			handle_list_command(storage, command + strlen(command_name) + 1);
+			result = 1;
 		}
 	}
 
@@ -111,4 +114,25 @@ void handle_find_command(storage_t *storage, char *arguments) {
 	} else {
 		printf(FIND_FORMAT, file->value);
 	}
+}
+
+void handle_list_command(storage_t *storage, char *arguments) {
+	file_t *file;
+
+	arguments = trim_whitespace(arguments);
+
+	file = get_file_by_path(storage, arguments);
+	if (file == NULL) {
+		printf(LIST_ERR_PATH_NOT_FOUND);
+	} else {
+		print_file_tree(file->children_tree);
+	}
+}
+
+void print_file_tree(link_t *link) {
+	if (link == NULL) return;
+
+	print_file_tree(link->left);
+	printf(LIST_FORMAT, link->value->name);
+	print_file_tree(link->right);
 }

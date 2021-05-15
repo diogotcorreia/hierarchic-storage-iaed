@@ -12,8 +12,14 @@ void add_path_recursively(storage_t* storage, char* path, char* value) {
 	name = strtok(path, PATH_SEPARATOR);
 
 	while (name != NULL) {
-		file_t* current_file = init_file(parent_file, name);
-		insert_list(get_file_children_by_creation(parent_file), current_file);
+		file_t* current_file = get_child_by_name(parent_file, name);
+
+		if (current_file == NULL) {
+			list_t* parent_children;
+			current_file = init_file(parent_file, name);
+			parent_children = get_file_children_by_creation(parent_file);
+			insert_list(parent_children, current_file);
+		}
 		/* TODO insert into binary tree */
 		parent_file = current_file;
 
@@ -52,6 +58,23 @@ list_t* get_file_children_by_creation(file_t* parent) {
 		parent->children_by_creation = init_list();
 	}
 	return parent->children_by_creation;
+}
+
+file_t* get_child_by_name(file_t* parent, char* name) {
+	/* TODO in the future, use the binary tree for better performance */
+	file_t* result = NULL;
+
+	if (parent->children_by_creation != NULL) {
+		node_t* aux = parent->children_by_creation->first;
+
+		while (aux != NULL && result == NULL) {
+			if (strcmp(aux->value->name, name) == 0) result = aux->value;
+
+			aux = aux->next;
+		}
+	}
+
+	return result;
 }
 
 void destroy_file(file_t* file) {

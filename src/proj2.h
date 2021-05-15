@@ -66,6 +66,8 @@ void set_file_value(file_t* file, char* value);
 
 list_t* get_file_children_by_creation(file_t* parent);
 
+file_t* get_child_by_name(file_t* parent, char* name);
+
 void destroy_file(file_t* file);
 
 list_t* init_list();

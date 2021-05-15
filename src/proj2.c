@@ -40,6 +40,8 @@ int handle_command(storage_t *storage) {
 		} else if (strcmp(command_name, PRINT_CMD) == 0) {
 			handle_print_command(storage);
 			result = 1;
+		} else if (strcmp(command_name, FIND_CMD) == 0) {
+			handle_find_command(storage, command + strlen(command_name) + 1);
 		}
 	}
 
@@ -93,4 +95,15 @@ void print_file_recursively(file_t *file) {
 void print_file_path(file_t *file) {
 	if (file->parent != NULL) print_file_path(file->parent);
 	if (file->name != NULL) printf(PATH_PRINT_FORMAT, file->name);
+}
+
+void handle_find_command(storage_t *storage, char *arguments) {
+	file_t *file = get_file_by_path(storage, arguments);
+	if (file == NULL) {
+		printf(FIND_ERR_FILE_NOT_FOUND);
+	} else if (file->value == NULL) {
+		printf(FIND_ERR_FILE_EMPTY);
+	} else {
+		printf(FIND_FORMAT, file->value);
+	}
 }

@@ -30,6 +30,21 @@ void add_path_recursively(storage_t* storage, char* path, char* value) {
 	set_file_value(parent_file, value); /* set value of the last file in path */
 }
 
+file_t* get_file_by_path(storage_t* storage, char* path) {
+	file_t* parent_file = storage->root_file;
+	char* name;
+
+	name = strtok(path, PATH_SEPARATOR);
+
+	while (name != NULL && parent_file != NULL) {
+		parent_file = get_child_by_name(parent_file, name);
+
+		name = strtok(NULL, PATH_SEPARATOR);
+	}
+
+	return parent_file;
+}
+
 /* Files */
 
 file_t* init_file(file_t* parent, char* name) {

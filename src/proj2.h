@@ -22,11 +22,15 @@
 #define DELETE_DESC "Apaga um caminho e todos os subcaminhos."
 
 #define WHITESPACE " \t\n"
-#define PATH_SEPARATOR "/"
+#define PATH_SEPARATOR "/\n"
 
 #define HELP_COMMAND_FORMAT "%s: %s\n"
 #define PATH_PRINT_FORMAT "/%s"
 #define PATH_VALUE_FORMAT " %s\n"
+#define FIND_FORMAT "%s\n"
+
+#define FIND_ERR_FILE_NOT_FOUND "not found\n"
+#define FIND_ERR_FILE_EMPTY "no data\n"
 
 struct file;
 

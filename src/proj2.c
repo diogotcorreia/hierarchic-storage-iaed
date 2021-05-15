@@ -30,12 +30,17 @@ int handle_command(storage_t *storage) {
 
 	command_name = strtok(command, WHITESPACE);
 
-	if (strcmp(command_name, HELP_CMD) == 0) {
-		handle_help_command();
-		result = 1;
-	} else if (strcmp(command_name, SET_CMD) == 0) {
-		handle_set_command(storage, command + strlen(command_name) + 1);
-		result = 1;
+	if (command_name != NULL) {
+		if (strcmp(command_name, HELP_CMD) == 0) {
+			handle_help_command();
+			result = 1;
+		} else if (strcmp(command_name, SET_CMD) == 0) {
+			handle_set_command(storage, command + strlen(command_name) + 1);
+			result = 1;
+		} else if (strcmp(command_name, PRINT_CMD) == 0) {
+			handle_print_command(storage);
+			result = 1;
+		}
 	}
 
 	free(command);
@@ -65,4 +70,27 @@ void handle_set_command(storage_t *storage, char *arguments) {
 	value = trim_whitespace(arguments);
 
 	add_path_recursively(storage, path, value);
+}
+
+void handle_print_command(storage_t *storage) {
+	print_file_recursively(storage->root_file);
+}
+
+void print_file_recursively(file_t *file) {
+	if (file->value != NULL) {
+		print_file_path(file);
+		printf(PATH_VALUE_FORMAT, file->value);
+	}
+	if (file->children_by_creation != NULL) {
+		node_t *aux = file->children_by_creation->first;
+		while (aux != NULL) {
+			print_file_recursively(aux->value);
+			aux = aux->next;
+		}
+	}
+}
+
+void print_file_path(file_t *file) {
+	if (file->parent != NULL) print_file_path(file->parent);
+	if (file->name != NULL) printf(PATH_PRINT_FORMAT, file->name);
 }

@@ -22,6 +22,8 @@
 #define PATH_SEPARATOR "/"
 
 #define HELP_COMMAND_FORMAT "%s: %s\n"
+#define PATH_PRINT_FORMAT "/%s"
+#define PATH_VALUE_FORMAT " %s\n"
 
 struct file;
 
@@ -55,6 +57,12 @@ int handle_command(storage_t* storage);
 void handle_help_command();
 
 void handle_set_command(storage_t* storage, char* arguments);
+
+void handle_print_command(storage_t* storage);
+
+void print_file_recursively(file_t* file);
+
+void print_file_path(file_t* file);
 
 /* paths.c */
 

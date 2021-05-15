@@ -1,5 +1,8 @@
 /* Diogo Torres Correia, ist199211 */
 
+#ifndef _PROJ2_H_
+#define _PROJ2_H_
+
 #define MAX_COMMAND_SIZE 65536
 #define HELP_CMD "help"
 #define HELP_DESC "Imprime os comandos disponíveis."
@@ -132,3 +135,5 @@ void destroy_tree(link_t* link);
 short is_whitespace(char c);
 
 char* trim_whitespace(char* str);
+
+#endif

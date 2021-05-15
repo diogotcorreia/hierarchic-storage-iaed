@@ -22,7 +22,7 @@
 #define DELETE_DESC "Apaga um caminho e todos os subcaminhos."
 
 #define WHITESPACE " \t\n"
-#define PATH_SEPARATOR "/\n"
+#define PATH_SEPARATOR "/"
 
 #define HELP_COMMAND_FORMAT "%s: %s\n"
 #define PATH_PRINT_FORMAT "/%s"

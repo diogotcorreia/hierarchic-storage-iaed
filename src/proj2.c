@@ -42,6 +42,7 @@ int handle_command(storage_t *storage) {
 			result = 1;
 		} else if (strcmp(command_name, FIND_CMD) == 0) {
 			handle_find_command(storage, command + strlen(command_name) + 1);
+			result = 1;
 		}
 	}
 
@@ -98,7 +99,11 @@ void print_file_path(file_t *file) {
 }
 
 void handle_find_command(storage_t *storage, char *arguments) {
-	file_t *file = get_file_by_path(storage, arguments);
+	file_t *file;
+
+	arguments = trim_whitespace(arguments);
+
+	file = get_file_by_path(storage, arguments);
 	if (file == NULL) {
 		printf(FIND_ERR_FILE_NOT_FOUND);
 	} else if (file->value == NULL) {

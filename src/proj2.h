@@ -71,7 +71,7 @@ typedef struct {
 /* proj2.c */
 /***********/
 
-int handle_command(storage_t* storage);
+int handle_command(storage_t* storage, char* command);
 
 void handle_help_command();
 

@@ -8,20 +8,22 @@
 
 int main() {
 	storage_t *storage = (storage_t *)malloc(sizeof(storage_t));
+	char *command = malloc(sizeof(char) * MAX_COMMAND_SIZE);
+
 	storage->root_file = init_file(NULL, NULL);
 
 	/* execute program until the user sends the 'quit' command */
-	while (handle_command(storage)) {
+	while (handle_command(storage, command)) {
 	}
 
+	free(command);
 	destroy_file(storage->root_file);
 	free(storage);
 
 	return 0;
 }
 
-int handle_command(storage_t *storage) {
-	char *command = malloc(sizeof(char) * MAX_COMMAND_SIZE);
+int handle_command(storage_t *storage, char *command) {
 	char *command_name;
 	short result = 0;
 
@@ -51,8 +53,6 @@ int handle_command(storage_t *storage) {
 			result = 1;
 		}
 	}
-
-	free(command);
 
 	/* if command_name is quit, return the default 'result' which is 0 */
 	return result;

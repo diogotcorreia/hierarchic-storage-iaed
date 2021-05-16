@@ -108,6 +108,8 @@ file_t* get_child_by_name(file_t* parent, char* name);
 
 void destroy_file(file_t* file);
 
+void delete_file(file_t* file);
+
 /* linked lists */
 
 list_t* init_list();
@@ -115,6 +117,8 @@ list_t* init_list();
 void insert_list(list_t* list, file_t* file);
 
 void destroy_list(list_t* list);
+
+void delete_node(list_t* list, file_t* value);
 
 /* trees */
 
@@ -141,6 +145,10 @@ link_t* insert_tree(link_t* link, file_t* file);
 file_t* get_link_by_value(link_t* link, char* value);
 
 void destroy_tree(link_t* link);
+
+link_t* max_link(link_t* link);
+
+link_t* delete_link(link_t* link, char* name);
 
 /***********/
 /* utils.c */

@@ -94,6 +94,15 @@ void destroy_file(file_t* file) {
 	free(file);
 }
 
+void delete_file(file_t* file) {
+	if (file->parent != NULL) {
+		delete_node(file->parent->children_by_creation, file);
+		file->parent->children_tree =
+			delete_link(file->parent->children_tree, file->name);
+	}
+	destroy_file(file);
+}
+
 /* Linked List */
 
 list_t* init_list() {
@@ -130,6 +139,25 @@ void destroy_list(list_t* list) {
 	}
 
 	free(list);
+}
+
+void delete_node(list_t* list, file_t* value) {
+	node_t* current_node = list->first;
+
+	while (current_node != NULL && current_node->value != value)
+		current_node = current_node->next;
+
+	if (current_node != NULL) {
+		if (current_node->prev != NULL)
+			current_node->prev->next = current_node->next;
+		else
+			list->first = current_node->next;
+		if (current_node->next != NULL)
+			current_node->next->prev = current_node->prev;
+		else
+			list->last = current_node->prev;
+		free(current_node);
+	}
 }
 
 /* AVL Tree */
@@ -248,4 +276,44 @@ void destroy_tree(link_t* link) {
 
 	/* no need to free the value since that's handled in the linked list */
 	free(link);
+}
+
+link_t* max_link(link_t* link) {
+	while (link != NULL && link->right != NULL) link = link->right;
+	return link;
+}
+
+link_t* delete_link(link_t* link, char* name) {
+	int cmp;
+	if (link == NULL) return link;
+
+	cmp = strcmp(name, link->value->name);
+	if (cmp < 0)
+		link->left = delete_link(link->left, name);
+	else if (cmp > 0)
+		link->right = delete_link(link->right, name);
+	else {
+		if (link->left != NULL && link->right != NULL) {
+			link_t* aux = max_link(link->left);
+			{
+				file_t* x = link->value;
+				link->value = aux->value;
+				aux->value = x;
+			}
+			link->left = delete_link(link->left, aux->value->name);
+		} else {
+			link_t* aux = link;
+			if (link->left == NULL && link->right == NULL)
+				link = NULL;
+			else if (link->left == NULL)
+				link = link->right;
+			else
+				link = link->left;
+			/* no need to free item since that's handled by the file itself */
+
+			free(aux);
+		}
+	}
+	link = balance(link);
+	return link;
 }

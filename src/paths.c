@@ -67,7 +67,10 @@ file_t* init_file(file_t* parent, char* name) {
 }
 
 void set_file_value(storage_t* storage, file_t* file, char* value) {
-	if (file->value != NULL) delete_hashtable(storage->search_table, file);
+	if (file->value != NULL) {
+		delete_hashtable(storage->search_table, file);
+		free(file->value);
+	}
 
 	file->value = malloc(sizeof(char) * (strlen(value) + 1));
 	strcpy(file->value, value);

@@ -102,12 +102,17 @@ void destroy_file(storage_t* storage, file_t* file) {
 }
 
 void delete_file(storage_t* storage, file_t* file) {
-	if (file->parent != NULL) {
+	int has_parent = file->parent != NULL;
+	if (has_parent) {
 		delete_node(file->parent->children_by_creation, file);
 		file->parent->children_tree =
 			delete_link(file->parent->children_tree, file->name);
 	}
 	destroy_file(storage, file);
+	if (!has_parent) {
+		/* since the root cannot be deleted, recreate it */
+		storage->root_file = init_file(NULL, NULL);
+	}
 }
 
 /* Linked List */

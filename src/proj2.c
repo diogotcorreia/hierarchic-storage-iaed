@@ -11,13 +11,15 @@ int main() {
 	char *command = malloc(sizeof(char) * MAX_COMMAND_SIZE);
 
 	storage->root_file = init_file(NULL, NULL);
+	storage->search_table = init_hashtable(HASHTABLE_START_SIZE);
 
 	/* execute program until the user sends the 'quit' command */
 	while (handle_command(storage, command)) {
 	}
 
 	free(command);
-	destroy_file(storage->root_file);
+	destroy_file(storage, storage->root_file);
+	destroy_hashtable(storage->search_table);
 	free(storage);
 
 	return 0;
@@ -149,6 +151,6 @@ void handle_delete_command(storage_t *storage, char *arguments) {
 	if (file == NULL) {
 		printf(DELETE_ERR_PATH_NOT_FOUND);
 	} else {
-		delete_file(file);
+		delete_file(storage, file);
 	}
 }

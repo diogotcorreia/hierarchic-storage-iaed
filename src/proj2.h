@@ -35,6 +35,8 @@
 #define LIST_ERR_PATH_NOT_FOUND "not found\n"
 #define DELETE_ERR_PATH_NOT_FOUND "not found\n"
 
+#define HASHTABLE_START_SIZE 7
+
 struct file;
 
 typedef struct node {
@@ -55,6 +57,12 @@ typedef struct list {
 	node_t* last;
 } list_t;
 
+typedef struct hashtable {
+	struct file** table;
+	int count;
+	int size;
+} hashtable_t;
+
 typedef struct file {
 	struct file* parent;
 	char* name;
@@ -65,6 +73,7 @@ typedef struct file {
 
 typedef struct {
 	file_t* root_file;
+	hashtable_t* search_table;
 } storage_t;
 
 /***********/
@@ -103,15 +112,15 @@ file_t* get_file_by_path(storage_t* storage, char* path);
 
 file_t* init_file(file_t* parent, char* name);
 
-void set_file_value(file_t* file, char* value);
+void set_file_value(storage_t* storage, file_t* file, char* value);
 
 list_t* get_file_children_by_creation(file_t* parent);
 
 file_t* get_child_by_name(file_t* parent, char* name);
 
-void destroy_file(file_t* file);
+void destroy_file(storage_t* storage, file_t* file);
 
-void delete_file(file_t* file);
+void delete_file(storage_t* storage, file_t* file);
 
 /* linked lists */
 
@@ -119,7 +128,7 @@ list_t* init_list();
 
 void insert_list(list_t* list, file_t* file);
 
-void destroy_list(list_t* list);
+void destroy_list(storage_t* storage, list_t* list);
 
 void delete_node(list_t* list, file_t* value);
 
@@ -152,6 +161,22 @@ void destroy_tree(link_t* link);
 link_t* max_link(link_t* link);
 
 link_t* delete_link(link_t* link, char* name);
+
+/* hashtables */
+
+int hash_string(char* v, int size);
+
+hashtable_t* init_hashtable(int size);
+
+hashtable_t* insert_hashtable(hashtable_t* hashtable, file_t* file);
+
+file_t* search_hashtable(hashtable_t* hashtable, char* value);
+
+void delete_hashtable(hashtable_t* hashtable, file_t* file);
+
+void destroy_hashtable(hashtable_t* hashtable);
+
+hashtable_t* expand_hashtable(hashtable_t* hashtable);
 
 /***********/
 /* utils.c */

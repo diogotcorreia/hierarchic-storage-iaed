@@ -27,7 +27,8 @@ void add_path_recursively(storage_t* storage, char* path, char* value) {
 		name = strtok(NULL, PATH_SEPARATOR);
 	}
 
-	set_file_value(parent_file, value); /* set value of the last file in path */
+	/* set value of the last file in path */
+	set_file_value(storage, parent_file, value);
 }
 
 file_t* get_file_by_path(storage_t* storage, char* path) {
@@ -65,9 +66,13 @@ file_t* init_file(file_t* parent, char* name) {
 	return new_file;
 }
 
-void set_file_value(file_t* file, char* value) {
+void set_file_value(storage_t* storage, file_t* file, char* value) {
+	if (file->value != NULL) delete_hashtable(storage->search_table, file);
+
 	file->value = malloc(sizeof(char) * (strlen(value) + 1));
 	strcpy(file->value, value);
+
+	storage->search_table = insert_hashtable(storage->search_table, file);
 }
 
 list_t* get_file_children_by_creation(file_t* parent) {
@@ -81,26 +86,28 @@ file_t* get_child_by_name(file_t* parent, char* name) {
 	return get_link_by_value(parent->children_tree, name);
 }
 
-void destroy_file(file_t* file) {
+void destroy_file(storage_t* storage, file_t* file) {
+	if (file->value != NULL) delete_hashtable(storage->search_table, file);
+
 	if (file->name != NULL) free(file->name);
 	if (file->value != NULL) free(file->value);
 	if (file->children_tree != NULL) {
 		destroy_tree(file->children_tree);
 	}
 	if (file->children_by_creation != NULL) {
-		destroy_list(file->children_by_creation);
+		destroy_list(storage, file->children_by_creation);
 	}
 
 	free(file);
 }
 
-void delete_file(file_t* file) {
+void delete_file(storage_t* storage, file_t* file) {
 	if (file->parent != NULL) {
 		delete_node(file->parent->children_by_creation, file);
 		file->parent->children_tree =
 			delete_link(file->parent->children_tree, file->name);
 	}
-	destroy_file(file);
+	destroy_file(storage, file);
 }
 
 /* Linked List */
@@ -127,14 +134,14 @@ void insert_list(list_t* list, file_t* item) {
 	list->last = node;
 }
 
-void destroy_list(list_t* list) {
+void destroy_list(storage_t* storage, list_t* list) {
 	node_t* next = list->first;
 
 	while (next != NULL) {
 		node_t* aux = next;
 		next = aux->next;
 
-		destroy_file(aux->value);
+		destroy_file(storage, aux->value);
 		free(aux);
 	}
 
@@ -316,4 +323,94 @@ link_t* delete_link(link_t* link, char* name) {
 	}
 	link = balance(link);
 	return link;
+}
+
+/* Hashtable */
+
+int hash_string(char* v, int size) {
+	int hash, a = 31415, b = 27183;
+
+	for (hash = 0; *v != '\0'; v++, a = a * b % (size - 1)) {
+		hash = (a * hash + *v) % size;
+	}
+	return hash;
+}
+
+hashtable_t* init_hashtable(int size) {
+	hashtable_t* hashtable = (hashtable_t*)malloc(sizeof(hashtable_t));
+	int i;
+	file_t** file_array = (file_t**)malloc(sizeof(file_t*) * size);
+
+	hashtable->table = file_array;
+	hashtable->size = size;
+	hashtable->count = 0;
+
+	for (i = 0; i < size; ++i) {
+		file_array[i] = NULL;
+	}
+
+	return hashtable;
+}
+
+hashtable_t* insert_hashtable(hashtable_t* hashtable, file_t* file) {
+	int i = hash_string(file->value, hashtable->size);
+	while (hashtable->table[i] != NULL) i = (i + 1) % hashtable->size;
+	hashtable->table[i] = file;
+	/* dynamically expand hashtable*/
+	if (++hashtable->count > hashtable->size / 2)
+		hashtable = expand_hashtable(hashtable);
+	return hashtable;
+}
+
+file_t* search_hashtable(hashtable_t* hashtable, char* value) {
+	int i = hash_string(value, hashtable->size);
+	while (hashtable->table[i] != NULL) {
+		if (strcmp(hashtable->table[i]->value, value) == 0) {
+			return hashtable->table[i];
+		} else {
+			i = (i + 1) % hashtable->size;
+		}
+	}
+	return NULL;
+}
+
+void delete_hashtable(hashtable_t* hashtable, file_t* file) {
+	int j, i = hash_string(file->value, hashtable->size);
+	file_t* tmp_file;
+	while (hashtable->table[i] != NULL) {
+		if (hashtable->table[i] == file)
+			break; /* compare by pointers */
+		else
+			i = (i + 1) % hashtable->size;
+	}
+	if (hashtable->table[i] == NULL) return;
+	hashtable->table[i] = NULL;
+	--hashtable->count;
+
+	for (j = (i + 1) % hashtable->size; hashtable->table[j] != NULL;
+	     j = (j + 1) % hashtable->size) {
+		tmp_file = hashtable->table[j];
+		hashtable->table[j] = NULL;
+		--hashtable->count;
+		insert_hashtable(hashtable, tmp_file);
+	}
+}
+
+void destroy_hashtable(hashtable_t* hashtable) {
+	free(hashtable->table);
+	free(hashtable);
+}
+
+hashtable_t* expand_hashtable(hashtable_t* hashtable) {
+	int i;
+	hashtable_t* new_hashtable = init_hashtable(hashtable->size * 2);
+
+	for (i = 0; i < hashtable->size; i++) {
+		if (hashtable->table[i] != NULL)
+			insert_hashtable(new_hashtable, hashtable->table[i]);
+	}
+
+	destroy_hashtable(hashtable);
+
+	return new_hashtable;
 }

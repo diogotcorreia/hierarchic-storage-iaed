@@ -150,36 +150,31 @@ int height(link_t* link) {
 	return link->height;
 }
 
+void update_height(link_t* link) {
+	int height_left = height(link->left);
+	int height_right = height(link->right);
+	link->height =
+		height_left > height_right ? height_left + 1 : height_right + 1;
+}
+
 link_t* rotL(link_t* link) {
-	int l_left, l_right, x_left, x_right;
 	link_t* x = link->right;
 	link->right = x->left;
 	x->left = link;
 
-	l_left = height(link->left);
-	l_right = height(link->right);
-	link->height = l_left > l_right ? l_left + 1 : l_right + 1;
-
-	x_left = height(x->left);
-	x_right = height(x->right);
-	x->height = x_left > x_right ? x_left + 1 : x_right + 1;
+	update_height(link);
+	update_height(x);
 
 	return x;
 }
 
 link_t* rotR(link_t* link) {
-	int l_left, l_right, x_left, x_right;
 	link_t* x = link->left;
 	link->left = x->right;
 	x->right = link;
 
-	l_left = height(link->left);
-	l_right = height(link->right);
-	link->height = l_left > l_right ? l_left + 1 : l_right + 1;
-
-	x_left = height(x->left);
-	x_right = height(x->right);
-	x->height = x_left > x_right ? x_left + 1 : x_right + 1;
+	update_height(link);
+	update_height(x);
 
 	return x;
 }
@@ -202,7 +197,7 @@ int balance_factor(link_t* link) {
 }
 
 link_t* balance(link_t* link) {
-	int bal_factor, l_left, l_right;
+	int bal_factor;
 	if (link == NULL) return link;
 	bal_factor = balance_factor(link);
 	if (bal_factor > 1) {
@@ -216,9 +211,7 @@ link_t* balance(link_t* link) {
 		else
 			link = rotRL(link);
 	} else {
-		l_left = height(link->left);
-		l_right = height(link->right);
-		link->height = l_left > l_right ? l_left + 1 : l_right + 1;
+		update_height(link);
 	}
 	return link;
 }

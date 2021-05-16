@@ -122,6 +122,8 @@ link_t* init_link(file_t* file, link_t* left, link_t* right);
 
 int height(link_t* link);
 
+void update_height(link_t* link);
+
 link_t* rotL(link_t* link);
 
 link_t* rotR(link_t* link);

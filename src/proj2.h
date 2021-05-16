@@ -34,6 +34,7 @@
 #define FIND_ERR_FILE_EMPTY "no data\n"
 #define LIST_ERR_PATH_NOT_FOUND "not found\n"
 #define DELETE_ERR_PATH_NOT_FOUND "not found\n"
+#define SEARCH_ERR_PATH_NOT_FOUND "not found\n"
 
 #define HASHTABLE_START_SIZE 7
 
@@ -97,6 +98,8 @@ void handle_find_command(storage_t* storage, char* arguments);
 void handle_list_command(storage_t* storage, char* arguments);
 
 void print_file_tree(link_t* link);
+
+void handle_search_command(storage_t* storage, char* arguments);
 
 void handle_delete_command(storage_t* storage, char* arguments);
 

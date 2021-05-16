@@ -50,6 +50,9 @@ int handle_command(storage_t *storage, char *command) {
 		} else if (strcmp(command_name, LIST_CMD) == 0) {
 			handle_list_command(storage, command + strlen(command_name) + 1);
 			result = 1;
+		} else if (strcmp(command_name, SEARCH_CMD) == 0) {
+			handle_search_command(storage, command + strlen(command_name) + 1);
+			result = 1;
 		} else if (strcmp(command_name, DELETE_CMD) == 0) {
 			handle_delete_command(storage, command + strlen(command_name) + 1);
 			result = 1;
@@ -140,6 +143,20 @@ void print_file_tree(link_t *link) {
 	print_file_tree(link->left);
 	printf(LIST_FORMAT, link->value->name);
 	print_file_tree(link->right);
+}
+
+void handle_search_command(storage_t *storage, char *arguments) {
+	file_t *file;
+
+	arguments = trim_whitespace(arguments);
+
+	file = search_hashtable(storage->search_table, arguments);
+	if (file == NULL) {
+		printf(SEARCH_ERR_PATH_NOT_FOUND);
+	} else {
+		print_file_path(file);
+		printf("\n");
+	}
 }
 
 void handle_delete_command(storage_t *storage, char *arguments) {

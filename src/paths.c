@@ -336,7 +336,7 @@ link_t* delete_link(link_t* link, char* name) {
 /* Hashtable */
 
 int hash_string(char* v, int size) {
-	int hash, a = 31415, b = 27183;
+	long int hash, a = 31415, b = 27183;
 
 	for (hash = 0; *v != '\0'; v++, a = a * b % (size - 1)) {
 		hash = (a * hash + *v) % size;

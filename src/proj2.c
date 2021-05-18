@@ -27,7 +27,7 @@ int main() {
 
 int handle_command(storage_t *storage, char *command) {
 	char *command_name;
-	short result = 0;
+	short result = 1;
 
 	command = fgets(command, MAX_COMMAND_SIZE, stdin);
 	if (command == NULL) return 0; /* EOF or error while reading from stdin */
@@ -37,25 +37,20 @@ int handle_command(storage_t *storage, char *command) {
 	if (command_name != NULL) {
 		if (strcmp(command_name, HELP_CMD) == 0) {
 			handle_help_command();
-			result = 1;
 		} else if (strcmp(command_name, SET_CMD) == 0) {
 			handle_set_command(storage, command + strlen(command_name) + 1);
-			result = 1;
 		} else if (strcmp(command_name, PRINT_CMD) == 0) {
 			handle_print_command(storage);
-			result = 1;
 		} else if (strcmp(command_name, FIND_CMD) == 0) {
 			handle_find_command(storage, command + strlen(command_name) + 1);
-			result = 1;
 		} else if (strcmp(command_name, LIST_CMD) == 0) {
 			handle_list_command(storage, command + strlen(command_name) + 1);
-			result = 1;
 		} else if (strcmp(command_name, SEARCH_CMD) == 0) {
 			handle_search_command(storage, command + strlen(command_name) + 1);
-			result = 1;
 		} else if (strcmp(command_name, DELETE_CMD) == 0) {
 			handle_delete_command(storage, command + strlen(command_name) + 1);
-			result = 1;
+		} else if (strcmp(command_name, QUIT_CMD) == 0) {
+			result = 0;
 		}
 	}
 

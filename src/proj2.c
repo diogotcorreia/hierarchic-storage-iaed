@@ -6,6 +6,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+/**
+ * The main function of the program.
+ * Creates the global storage struct, root files and hashtable.
+ * Repeatedly waits for a new command.
+ * Ends the program by freeing all the used memory.
+ */
 int main() {
 	storage_t *storage = (storage_t *)malloc(sizeof(storage_t));
 	char *command = malloc(sizeof(char) * MAX_COMMAND_SIZE);
@@ -25,9 +31,16 @@ int main() {
 	return 0;
 }
 
+/**
+ * Handles command input.
+ * A string is passed as an argument as a buffer to store the command
+ * from stdin, which should be reused across commands.
+ * If the program should continue after the command, returns 1.
+ * Otherwise returns 0.
+ */
 int handle_command(storage_t *storage, char *command) {
 	char *command_name;
-	short result = 1;
+	short result = 1; /* 1 continues the program, 0 quits */
 
 	command = fgets(command, MAX_COMMAND_SIZE, stdin);
 	if (command == NULL) return 0; /* EOF or error while reading from stdin */
@@ -54,10 +67,12 @@ int handle_command(storage_t *storage, char *command) {
 		}
 	}
 
-	/* if command_name is quit, return the default 'result' which is 0 */
 	return result;
 }
 
+/**
+ * Handles the 'help' command, printing each command and its description.
+ */
 void handle_help_command() {
 	printf(HELP_COMMAND_FORMAT, HELP_CMD, HELP_DESC);
 	printf(HELP_COMMAND_FORMAT, QUIT_CMD, QUIT_DESC);
@@ -69,6 +84,11 @@ void handle_help_command() {
 	printf(HELP_COMMAND_FORMAT, DELETE_CMD, DELETE_DESC);
 }
 
+/**
+ * Handles the 'set' command.
+ * Receives the arguments of the command, and extracts the path and value,
+ * passing them to the add path function.
+ */
 void handle_set_command(storage_t *storage, char *arguments) {
 	char *path;
 	char *value;
@@ -81,10 +101,19 @@ void handle_set_command(storage_t *storage, char *arguments) {
 	add_path_recursively(storage, path, value);
 }
 
+/**
+ * Handles the 'print' command.
+ * Prints the path and value of every known file.
+ */
 void handle_print_command(storage_t *storage) {
 	print_file_recursively(storage->root_file);
 }
 
+/**
+ * Prints the path and value of each file and its children, recursively.
+ * It only prints information about files that have a value.
+ * If a file does not have a value, its path is NOT printed to stdout.
+ */
 void print_file_recursively(file_t *file) {
 	if (file->value != NULL) {
 		print_file_path(file);
@@ -99,11 +128,21 @@ void print_file_recursively(file_t *file) {
 	}
 }
 
+/**
+ * Prints the full path of a file to stdout.
+ * Since a file only knows about its parent, and not the full parent list, the
+ * full path must be recreated using recursion.
+ */
 void print_file_path(file_t *file) {
 	if (file->parent != NULL) print_file_path(file->parent);
 	if (file->name != NULL) printf(PATH_PRINT_FORMAT, file->name);
 }
 
+/**
+ * Handles the 'find' command.
+ * Receives a path to a files and prints its value.
+ * Can also print file not found or file empty errors.
+ */
 void handle_find_command(storage_t *storage, char *arguments) {
 	file_t *file;
 
@@ -119,6 +158,11 @@ void handle_find_command(storage_t *storage, char *arguments) {
 	}
 }
 
+/**
+ * Handles the 'list' command.
+ * Receives a path and prints the name of all children files, alphabetically.
+ * Can also print file not found error.
+ */
 void handle_list_command(storage_t *storage, char *arguments) {
 	file_t *file;
 
@@ -132,6 +176,10 @@ void handle_list_command(storage_t *storage, char *arguments) {
 	}
 }
 
+/**
+ * Prints a "directory", that is, a set of files that share the same parent,
+ * in alphabetical order by traversing a binary tree.
+ */
 void print_file_tree(link_t *link) {
 	if (link == NULL) return;
 
@@ -140,6 +188,12 @@ void print_file_tree(link_t *link) {
 	print_file_tree(link->right);
 }
 
+/**
+ * Handles the 'search' command.
+ * Receives a value and prints the path of the file that has that same value.
+ * Can also print file not found error when no file with that value
+ * does not exist.
+ */
 void handle_search_command(storage_t *storage, char *arguments) {
 	file_t *file;
 
@@ -154,6 +208,11 @@ void handle_search_command(storage_t *storage, char *arguments) {
 	}
 }
 
+/**
+ * Handles the 'delete' command.
+ * Receives a path and deletes the associated file and all its children.
+ * Can also print file not found error.
+ */
 void handle_delete_command(storage_t *storage, char *arguments) {
 	file_t *file;
 

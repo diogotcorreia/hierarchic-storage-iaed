@@ -5,6 +5,12 @@
 
 #include "proj2.h"
 
+/**
+ * Insert path and value into storage, creating all parent files (directories)
+ * in the path.
+ * The path is split by '/', and each component is a different file (or
+ * directory).
+ */
 void add_path_recursively(storage_t* storage, char* path, char* value) {
 	file_t* parent_file = storage->root_file;
 	char* name;
@@ -31,6 +37,10 @@ void add_path_recursively(storage_t* storage, char* path, char* value) {
 	set_file_value(storage, parent_file, value);
 }
 
+/**
+ * Gets a a file by its full path.
+ * Returns NULL if the file does not exist.
+ */
 file_t* get_file_by_path(storage_t* storage, char* path) {
 	file_t* parent_file = storage->root_file;
 	char* name;
@@ -48,6 +58,12 @@ file_t* get_file_by_path(storage_t* storage, char* path) {
 
 /* Files */
 
+/**
+ * Initializes a file struct. Creates a new file with the given name
+ * and parent, and without any value (its set as NULL).
+ * The file name is copied into the file.
+ * Returns the newly allocated file.
+ */
 file_t* init_file(file_t* parent, char* name) {
 	file_t* new_file = (file_t*)malloc(sizeof(file_t));
 
@@ -66,6 +82,11 @@ file_t* init_file(file_t* parent, char* name) {
 	return new_file;
 }
 
+/**
+ * Sets or updates the value of a given file.
+ * The value is copied into the file.
+ * The global hashtable is updated to reflect the value change.
+ */
 void set_file_value(storage_t* storage, file_t* file, char* value) {
 	if (file->value != NULL) {
 		delete_hashtable(storage->search_table, file);
@@ -78,6 +99,11 @@ void set_file_value(storage_t* storage, file_t* file, char* value) {
 	storage->search_table = insert_hashtable(storage->search_table, file);
 }
 
+/**
+ * Get a double linked list of file's children, sorted by when the child file
+ * was created. If the parent has no children, returns an empty list.
+ * Returns the list of children.
+ */
 list_t* get_file_children_by_creation(file_t* parent) {
 	if (parent->children_by_creation == NULL) {
 		parent->children_by_creation = init_list();
@@ -85,10 +111,20 @@ list_t* get_file_children_by_creation(file_t* parent) {
 	return parent->children_by_creation;
 }
 
+/**
+ * Get the direct child of a file by its name.
+ * Returns the file with that name.
+ * If the file does not exist, returns NULL.
+ */
 file_t* get_child_by_name(file_t* parent, char* name) {
 	return get_link_by_value(parent->children_tree, name);
 }
 
+/**
+ * Removes a file and its children from storage, including from the global
+ * hashtable. Additionally, frees all the memory associated with them.
+ * Does not remove the file reference from its parent.
+ */
 void destroy_file(storage_t* storage, file_t* file) {
 	if (file->value != NULL) delete_hashtable(storage->search_table, file);
 
@@ -104,6 +140,10 @@ void destroy_file(storage_t* storage, file_t* file) {
 	free(file);
 }
 
+/**
+ * Removes a file from its parent (if exists) and then destroys the file
+ * using destroy_file.
+ */
 void delete_file(storage_t* storage, file_t* file) {
 	int has_parent = file->parent != NULL;
 	if (has_parent) {
@@ -120,6 +160,10 @@ void delete_file(storage_t* storage, file_t* file) {
 
 /* Linked List */
 
+/**
+ * Create a new empty double linked list.
+ * Returns the newly created list.
+ */
 list_t* init_list() {
 	list_t* new_list = malloc(sizeof(list_t));
 	new_list->first = NULL;
@@ -127,6 +171,10 @@ list_t* init_list() {
 	return new_list;
 }
 
+/**
+ * Inserts a given (already allocated) file into the given double linked list,
+ * as the last element.
+ */
 void insert_list(list_t* list, file_t* item) {
 	node_t* node = (node_t*)malloc(sizeof(node_t));
 
@@ -142,6 +190,10 @@ void insert_list(list_t* list, file_t* item) {
 	list->last = node;
 }
 
+/**
+ * Removes all items (files) from the list, frees the list nodes and the
+ * associated files.
+ */
 void destroy_list(storage_t* storage, list_t* list) {
 	node_t* next = list->first;
 
@@ -156,6 +208,10 @@ void destroy_list(storage_t* storage, list_t* list) {
 	free(list);
 }
 
+/**
+ * Deletes a single node from the list that has the given value (file), freeing
+ * itself. The file (value) is not freed.
+ */
 void delete_node(list_t* list, file_t* value) {
 	node_t* current_node = list->first;
 
@@ -177,6 +233,11 @@ void delete_node(list_t* list, file_t* value) {
 
 /* AVL Tree */
 
+/**
+ * Creates a new AVL Tree item with the given value (file) and left/right
+ * children.
+ * Returns the newly created link.
+ */
 link_t* init_link(file_t* file, link_t* left, link_t* right) {
 	link_t* new_link = (link_t*)malloc(sizeof(link_t));
 
@@ -188,11 +249,20 @@ link_t* init_link(file_t* file, link_t* left, link_t* right) {
 	return new_link;
 }
 
+/**
+ * Gets the height of a tree link.
+ * If the link is NULL, the height is 0.
+ * Returns the height of the link.
+ */
 int height(link_t* link) {
 	if (link == NULL) return 0;
 	return link->height;
 }
 
+/**
+ * Recalculates the height of the given link based on the height of its
+ * children.
+ */
 void update_height(link_t* link) {
 	int height_left = height(link->left);
 	int height_right = height(link->right);
@@ -200,6 +270,10 @@ void update_height(link_t* link) {
 		height_left > height_right ? height_left + 1 : height_right + 1;
 }
 
+/**
+ * Executes a rotation left on the given link.
+ * Returns the link that is now in the position of the given link.
+ */
 link_t* rotL(link_t* link) {
 	link_t* x = link->right;
 	link->right = x->left;
@@ -211,6 +285,10 @@ link_t* rotL(link_t* link) {
 	return x;
 }
 
+/**
+ * Executes a rotation right on the given link.
+ * Returns the link that is now in the position of the given link.
+ */
 link_t* rotR(link_t* link) {
 	link_t* x = link->left;
 	link->left = x->right;
@@ -222,23 +300,40 @@ link_t* rotR(link_t* link) {
 	return x;
 }
 
+/**
+ * Executes a rotation left followed by a rotation right on the given link.
+ * Returns the link that is now in the position of the given link.
+ */
 link_t* rotLR(link_t* link) {
 	if (link == NULL) return link;
 	link->left = rotL(link->left);
 	return rotR(link);
 }
 
+/**
+ * Executes a rotation right followed by a rotation left on the given link.
+ * Returns the link that is now in the position of the given link.
+ */
 link_t* rotRL(link_t* link) {
 	if (link == NULL) return link;
 	link->right = rotR(link->right);
 	return rotL(link);
 }
 
+/**
+ * Gets the balance factor of the given link, which is the difference
+ * between the height of the left and right links.
+ * If link is NULL, returns 0.
+ */
 int balance_factor(link_t* link) {
 	if (link == NULL) return 0;
 	return height(link->left) - height(link->right);
 }
 
+/**
+ * Balance a tree link by executing the necessary rotations.
+ * Returns the link that is now in the position of the given link.
+ */
 link_t* balance(link_t* link) {
 	int bal_factor;
 	if (link == NULL) return link;
@@ -259,6 +354,10 @@ link_t* balance(link_t* link) {
 	return link;
 }
 
+/**
+ * Insert a new item (file) under the given link.
+ * Automatically balances the resulting AVL tree.
+ */
 link_t* insert_tree(link_t* link, file_t* file) {
 	if (link == NULL) return init_link(file, NULL, NULL);
 
@@ -270,6 +369,10 @@ link_t* insert_tree(link_t* link, file_t* file) {
 	return link;
 }
 
+/**
+ * Get the file that has the given name (value) from the given tree (link).
+ * Returns the found file. If the file does not exist, returns NULL.
+ */
 file_t* get_link_by_value(link_t* link, char* value) {
 	int cmp;
 	if (link == NULL) return NULL;
@@ -284,6 +387,10 @@ file_t* get_link_by_value(link_t* link, char* value) {
 	}
 }
 
+/**
+ * Destroys the entire tree given by the root link.
+ * Frees each link, but not their value.
+ */
 void destroy_tree(link_t* link) {
 	if (link == NULL) return;
 	destroy_tree(link->left);
@@ -293,11 +400,20 @@ void destroy_tree(link_t* link) {
 	free(link);
 }
 
+/**
+ * Returns the maximum value under the given link, that is, the rightmost link.
+ */
 link_t* max_link(link_t* link) {
 	while (link != NULL && link->right != NULL) link = link->right;
 	return link;
 }
 
+/**
+ * Removes a link from the tree (identified by the root link) by its name.
+ * Automatically balances the tree afterwards.
+ * Frees the removed link, but not its value.
+ * Returns the link that is now in the position of the given link.
+ */
 link_t* delete_link(link_t* link, char* name) {
 	int cmp;
 	if (link == NULL) return link;
@@ -335,6 +451,10 @@ link_t* delete_link(link_t* link, char* name) {
 
 /* Hashtable */
 
+/**
+ * Hash a string based on the size of the hashtable.
+ * Returns the generated hash.
+ */
 int hash_string(char* v, int size) {
 	long int hash, a = 31415, b = 27183;
 
@@ -344,6 +464,11 @@ int hash_string(char* v, int size) {
 	return hash;
 }
 
+/**
+ * Creates a new (empty) hashtable with the given size.
+ * The hashtable uses a linear probing strategy.
+ * Returns a pointer to the newly created hashtable.
+ */
 hashtable_t* init_hashtable(int size) {
 	hashtable_t* hashtable = (hashtable_t*)malloc(sizeof(hashtable_t));
 	int i;
@@ -360,6 +485,12 @@ hashtable_t* init_hashtable(int size) {
 	return hashtable;
 }
 
+/**
+ * Inserts a file into the hashtable, hashed by the file value.
+ * If the resulting hashtable size is more than half the size of the hashtable,
+ * the hashtable is expanded by doubling its size.
+ * Returns a pointer to the resulting hashtable, since it can be expanded.
+ */
 hashtable_t* insert_hashtable(hashtable_t* hashtable, file_t* file) {
 	int i = hash_string(file->value, hashtable->size);
 	while (hashtable->table[i] != NULL) i = (i + 1) % hashtable->size;
@@ -370,6 +501,11 @@ hashtable_t* insert_hashtable(hashtable_t* hashtable, file_t* file) {
 	return hashtable;
 }
 
+/**
+ * Search for a file by value in the hashtable.
+ * Returns the first file with the value if it exists.
+ * Otherwise, returns NULL.
+ */
 file_t* search_hashtable(hashtable_t* hashtable, char* value) {
 	int i = hash_string(value, hashtable->size);
 	while (hashtable->table[i] != NULL) {
@@ -382,6 +518,11 @@ file_t* search_hashtable(hashtable_t* hashtable, char* value) {
 	return NULL;
 }
 
+/**
+ * Deletes the given file from the hashtable.
+ * Does not free the memory associated with the file.
+ * The index for the imediately next items is recalculated.
+ */
 void delete_hashtable(hashtable_t* hashtable, file_t* file) {
 	int j, i = hash_string(file->value, hashtable->size);
 	file_t* tmp_file;
@@ -404,11 +545,21 @@ void delete_hashtable(hashtable_t* hashtable, file_t* file) {
 	}
 }
 
+/**
+ * Destroys the given hashtable, freeing the memory used by it.
+ * Does not free the memory associated with the files themselves.
+ */
 void destroy_hashtable(hashtable_t* hashtable) {
 	free(hashtable->table);
 	free(hashtable);
 }
 
+/**
+ * Expands the given hashtable by doubling its size.
+ * Creates a new hashtable and recalculates the hash for all the values it
+ * holds, inserting them into the new hashtable.
+ * Returns the result of expanding the hashtable.
+ */
 hashtable_t* expand_hashtable(hashtable_t* hashtable) {
 	int i;
 	hashtable_t* new_hashtable = init_hashtable(hashtable->size * 2);

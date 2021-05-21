@@ -120,6 +120,7 @@ void print_file_recursively(file_t *file) {
 		printf(PATH_VALUE_FORMAT, file->value);
 	}
 	if (file->children_by_creation != NULL) {
+		/* TODO use a new traverse_list function */
 		node_t *aux = file->children_by_creation->first;
 		while (aux != NULL) {
 			print_file_recursively(aux->value);
@@ -181,6 +182,7 @@ void handle_list_command(storage_t *storage, char *arguments) {
  * in alphabetical order by traversing a binary tree.
  */
 void print_file_tree(link_t *link) {
+	/* TODO add traverse tree function */
 	if (link == NULL) return;
 
 	print_file_tree(link->left);

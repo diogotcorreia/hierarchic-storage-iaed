@@ -15,12 +15,14 @@ void add_path_recursively(storage_t* storage, char* path, char* value) {
 	file_t* parent_file = storage->root_file;
 	char* name;
 
+	/* split the file path by slashes */
 	name = strtok(path, PATH_SEPARATOR);
 
 	while (name != NULL) {
 		file_t* current_file = get_child_by_name(parent_file, name);
 
 		if (current_file == NULL) {
+			/* create each file in the path if it does not exist */
 			list_t* parent_children;
 			current_file = init_file(parent_file, name);
 			parent_children = get_file_children_by_creation(parent_file);
@@ -45,6 +47,7 @@ file_t* get_file_by_path(storage_t* storage, char* path) {
 	file_t* parent_file = storage->root_file;
 	char* name;
 
+	/* split the file path by slashes */
 	name = strtok(path, PATH_SEPARATOR);
 
 	while (name != NULL && parent_file != NULL) {
@@ -72,6 +75,7 @@ file_t* init_file(file_t* parent, char* name) {
 	new_file->children_tree = NULL;
 	new_file->value = NULL;
 
+	/* the file name can be NULL if it is the root file */
 	if (name != NULL) {
 		new_file->name = (char*)malloc(sizeof(char) * (strlen(name) + 1));
 		strcpy(new_file->name, name);
@@ -89,6 +93,7 @@ file_t* init_file(file_t* parent, char* name) {
  */
 void set_file_value(storage_t* storage, file_t* file, char* value) {
 	if (file->value != NULL) {
+		/* discard the old stored value */
 		delete_hashtable(storage->search_table, file);
 		free(file->value);
 	}

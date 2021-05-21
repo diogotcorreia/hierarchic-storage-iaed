@@ -1,5 +1,7 @@
 /* Diogo Torres Correia, ist199211 */
 
+#include "structures.h"
+
 #ifndef _PROJ2_H_
 #define _PROJ2_H_
 
@@ -36,34 +38,6 @@
 #define DELETE_ERR_PATH_NOT_FOUND "not found\n"
 #define SEARCH_ERR_PATH_NOT_FOUND "not found\n"
 
-#define HASHTABLE_START_SIZE 7
-
-struct file;
-
-typedef struct node {
-	struct node* next;
-	struct node* prev;
-	struct file* value;
-} node_t;
-
-typedef struct link {
-	struct file* value;
-	struct link* left;
-	struct link* right;
-	int height;
-} link_t;
-
-typedef struct list {
-	node_t* first;
-	node_t* last;
-} list_t;
-
-typedef struct hashtable {
-	struct file** table;
-	int count;
-	int size;
-} hashtable_t;
-
 typedef struct file {
 	struct file* parent;
 	char* name;
@@ -89,7 +63,7 @@ void handle_set_command(storage_t* storage, char* arguments);
 
 void handle_print_command(storage_t* storage);
 
-void print_file_recursively(file_t* file);
+void print_files_recursively(void* data, void* value);
 
 void print_file_path(file_t* file);
 
@@ -125,61 +99,15 @@ void destroy_file(storage_t* storage, file_t* file);
 
 void delete_file(storage_t* storage, file_t* file);
 
-/* linked lists */
+/* auxiliaries */
 
-list_t* init_list();
+char* get_file_name(void* file);
 
-void insert_list(list_t* list, file_t* file);
+char* get_file_value(void* file);
 
-void destroy_list(storage_t* storage, list_t* list);
+void print_file_name(void* file);
 
-void delete_node(list_t* list, file_t* value);
-
-/* trees */
-
-link_t* init_link(file_t* file, link_t* left, link_t* right);
-
-int height(link_t* link);
-
-void update_height(link_t* link);
-
-link_t* rotL(link_t* link);
-
-link_t* rotR(link_t* link);
-
-link_t* rotLR(link_t* link);
-
-link_t* rotRL(link_t* link);
-
-int balance_factor(link_t* link);
-
-link_t* balance(link_t* link);
-
-link_t* insert_tree(link_t* link, file_t* file);
-
-file_t* get_link_by_value(link_t* link, char* value);
-
-void destroy_tree(link_t* link);
-
-link_t* max_link(link_t* link);
-
-link_t* delete_link(link_t* link, char* name);
-
-/* hashtables */
-
-int hash_string(char* v, int size);
-
-hashtable_t* init_hashtable(int size);
-
-hashtable_t* insert_hashtable(hashtable_t* hashtable, file_t* file);
-
-file_t* search_hashtable(hashtable_t* hashtable, char* value);
-
-void delete_hashtable(hashtable_t* hashtable, file_t* file);
-
-void destroy_hashtable(hashtable_t* hashtable);
-
-hashtable_t* expand_hashtable(hashtable_t* hashtable);
+void destroy_file_aux(void* data, void* value);
 
 /***********/
 /* utils.c */

@@ -106,7 +106,7 @@ void handle_set_command(storage_t *storage, char *arguments) {
  * Prints the path and value of every known file.
  */
 void handle_print_command(storage_t *storage) {
-	print_file_recursively(storage->root_file);
+	print_files_recursively(NULL, storage->root_file);
 }
 
 /**
@@ -114,18 +114,15 @@ void handle_print_command(storage_t *storage) {
  * It only prints information about files that have a value.
  * If a file does not have a value, its path is NOT printed to stdout.
  */
-void print_file_recursively(file_t *file) {
+void print_files_recursively(void *data, void *value) {
+	file_t *file = (file_t *)value;
 	if (file->value != NULL) {
 		print_file_path(file);
 		printf(PATH_VALUE_FORMAT, file->value);
 	}
 	if (file->children_by_creation != NULL) {
-		/* TODO use a new traverse_list function */
-		node_t *aux = file->children_by_creation->first;
-		while (aux != NULL) {
-			print_file_recursively(aux->value);
-			aux = aux->next;
-		}
+		traverse_list(file->children_by_creation, data,
+		              print_files_recursively);
 	}
 }
 
@@ -181,14 +178,7 @@ void handle_list_command(storage_t *storage, char *arguments) {
  * Prints a "directory", that is, a set of files that share the same parent,
  * in alphabetical order by traversing a binary tree.
  */
-void print_file_tree(link_t *link) {
-	/* TODO add traverse tree function */
-	if (link == NULL) return;
-
-	print_file_tree(link->left);
-	printf(LIST_FORMAT, link->value->name);
-	print_file_tree(link->right);
-}
+void print_file_tree(link_t *link) { traverse_tree(link, print_file_name); }
 
 /**
  * Handles the 'search' command.
@@ -201,7 +191,7 @@ void handle_search_command(storage_t *storage, char *arguments) {
 
 	arguments = trim_whitespace(arguments);
 
-	file = search_hashtable(storage->search_table, arguments);
+	file = search_hashtable(storage->search_table, arguments, get_file_value);
 	if (file == NULL) {
 		printf(SEARCH_ERR_PATH_NOT_FOUND);
 	} else {

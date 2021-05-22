@@ -61,8 +61,6 @@ file_t* get_file_by_path(storage_t* storage, char* path) {
 	return parent_file;
 }
 
-/* Files */
-
 /**
  * Initializes a file struct. Creates a new file with the given name
  * and parent, and without any value (its set as NULL).
@@ -133,24 +131,26 @@ file_t* get_child_by_name(file_t* parent, char* name) {
  * hashtable. Additionally, frees all the memory associated with them.
  * Does not remove the file reference from its parent.
  */
-void destroy_file(storage_t* storage, file_t* file) {
-	if (file->value != NULL)
-		delete_hashtable(storage->search_table, file, get_file_value);
+void destroy_file(void* storage, void* file) {
+	file_t* f = (file_t*)file;
+	if (f->value != NULL)
+		delete_hashtable(((storage_t*)storage)->search_table, file,
+		                 get_file_value);
 
-	if (file->name != NULL) free(file->name);
-	if (file->value != NULL) free(file->value);
+	if (f->name != NULL) free(f->name);
+	if (f->value != NULL) free(f->value);
 
 	/* destroy all child files */
 
-	if (file->children_by_creation != NULL) {
-		traverse_list(file->children_by_creation, storage, destroy_file_aux);
-		destroy_list(file->children_by_creation);
+	if (f->children_by_creation != NULL) {
+		traverse_list(f->children_by_creation, storage, destroy_file);
+		destroy_list(f->children_by_creation);
 	}
-	if (file->children_tree != NULL) {
-		destroy_tree(file->children_tree);
+	if (f->children_tree != NULL) {
+		destroy_tree(f->children_tree);
 	}
 
-	free(file);
+	free(f);
 }
 
 /**
@@ -171,14 +171,61 @@ void delete_file(storage_t* storage, file_t* file) {
 	}
 }
 
+/**
+ * Prints the path and value of each file and its children, recursively.
+ * It only prints information about files that have a value.
+ * If a file does not have a value, its path is NOT printed to stdout.
+ */
+void print_files_recursively(void* data, void* value) {
+	file_t* file = (file_t*)value;
+	if (file->value != NULL) {
+		print_file_path(file);
+		printf(PATH_VALUE_FORMAT, file->value);
+	}
+	if (file->children_by_creation != NULL) {
+		traverse_list(file->children_by_creation, data,
+		              print_files_recursively);
+	}
+}
+
+/**
+ * Prints the full path of a file to stdout.
+ * Since a file only knows about its parent, and not the full parent list, the
+ * full path must be recreated using recursion.
+ */
+void print_file_path(file_t* file) {
+	if (file->parent != NULL) print_file_path(file->parent);
+	if (file->name != NULL) printf(PATH_PRINT_FORMAT, file->name);
+}
+
+/**
+ * Prints a "directory", that is, a set of files that share the same parent,
+ * in alphabetical order by traversing a binary tree.
+ */
+void print_file_tree(link_t* link) {
+	traverse_tree(link, print_file_name);
+}
+
 /* Auxiliaries */
 
-char* get_file_name(void* file) { return ((file_t*)file)->name; }
+/**
+ * Returns the file name of a given file.
+ * If the file is the root file, returns NULL.
+ */
+char* get_file_name(void* file) {
+	return ((file_t*)file)->name;
+}
 
-char* get_file_value(void* file) { return ((file_t*)file)->value; }
+/**
+ * Returns the value of a given file, which might be NULL.
+ */
+char* get_file_value(void* file) {
+	return ((file_t*)file)->value;
+}
 
-void print_file_name(void* file) { printf(LIST_FORMAT, ((file_t*)file)->name); }
-
-void destroy_file_aux(void* data, void* value) {
-	destroy_file((storage_t*)data, (file_t*)value);
+/**
+ * Given a file, prints that file's name to stdout.
+ */
+void print_file_name(void* file) {
+	printf(LIST_FORMAT, ((file_t*)file)->name);
 }

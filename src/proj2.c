@@ -19,7 +19,7 @@ int main() {
 	storage->root_file = init_file(NULL, NULL);
 	storage->search_table = init_hashtable(HASHTABLE_START_SIZE);
 
-	/* execute program until the user sends the 'quit' command */
+	/* execute program until the user sends the "quit" command */
 	while (handle_command(storage, command)) {
 	}
 
@@ -38,7 +38,7 @@ int main() {
  * If the program should continue after the command, returns 1.
  * Otherwise returns 0.
  */
-int handle_command(storage_t *storage, char *command) {
+short handle_command(storage_t *storage, char *command) {
 	char *command_name;
 	short result = 1; /* 1 continues the program, 0 quits */
 
@@ -110,33 +110,6 @@ void handle_print_command(storage_t *storage) {
 }
 
 /**
- * Prints the path and value of each file and its children, recursively.
- * It only prints information about files that have a value.
- * If a file does not have a value, its path is NOT printed to stdout.
- */
-void print_files_recursively(void *data, void *value) {
-	file_t *file = (file_t *)value;
-	if (file->value != NULL) {
-		print_file_path(file);
-		printf(PATH_VALUE_FORMAT, file->value);
-	}
-	if (file->children_by_creation != NULL) {
-		traverse_list(file->children_by_creation, data,
-		              print_files_recursively);
-	}
-}
-
-/**
- * Prints the full path of a file to stdout.
- * Since a file only knows about its parent, and not the full parent list, the
- * full path must be recreated using recursion.
- */
-void print_file_path(file_t *file) {
-	if (file->parent != NULL) print_file_path(file->parent);
-	if (file->name != NULL) printf(PATH_PRINT_FORMAT, file->name);
-}
-
-/**
  * Handles the 'find' command.
  * Receives a path to a files and prints its value.
  * Can also print file not found or file empty errors.
@@ -175,12 +148,6 @@ void handle_list_command(storage_t *storage, char *arguments) {
 }
 
 /**
- * Prints a "directory", that is, a set of files that share the same parent,
- * in alphabetical order by traversing a binary tree.
- */
-void print_file_tree(link_t *link) { traverse_tree(link, print_file_name); }
-
-/**
  * Handles the 'search' command.
  * Receives a value and prints the path of the file that has that same value.
  * Can also print file not found error when no file with that value
@@ -216,4 +183,38 @@ void handle_delete_command(storage_t *storage, char *arguments) {
 	} else {
 		delete_file(storage, file);
 	}
+}
+
+/*********/
+/* Utils */
+/*********/
+
+/**
+ * Checks if a character is a space, tab or newline.
+ * Returns 1 if so, otherwise returns 0.
+ */
+short is_whitespace(char c) {
+	return c == ' ' || c == '\t' || c == '\n';
+}
+
+/**
+ * Removes whitespace (spaces, tabs or newlines) from the beginning and end
+ * of the given string by modifying the string.
+ * Returns a pointer to the first non-whitespace character, and places a
+ * '\0' after the last non-whitespace character.
+ */
+char *trim_whitespace(char *str) {
+	int i = 0;
+	char *last_non_whitespace;
+	while (is_whitespace(*str)) ++str;
+
+	for (last_non_whitespace = str; str[i] != '\0'; ++i) {
+		if (!is_whitespace(str[i])) {
+			last_non_whitespace = str + i;
+		}
+	}
+
+	*(last_non_whitespace + 1) = '\0';
+
+	return str;
 }

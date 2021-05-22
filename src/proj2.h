@@ -55,7 +55,7 @@ typedef struct {
 /* proj2.c */
 /***********/
 
-int handle_command(storage_t* storage, char* command);
+short handle_command(storage_t* storage, char* command);
 
 void handle_help_command();
 
@@ -63,19 +63,19 @@ void handle_set_command(storage_t* storage, char* arguments);
 
 void handle_print_command(storage_t* storage);
 
-void print_files_recursively(void* data, void* value);
-
-void print_file_path(file_t* file);
-
 void handle_find_command(storage_t* storage, char* arguments);
 
 void handle_list_command(storage_t* storage, char* arguments);
 
-void print_file_tree(link_t* link);
-
 void handle_search_command(storage_t* storage, char* arguments);
 
 void handle_delete_command(storage_t* storage, char* arguments);
+
+/* utils */
+
+short is_whitespace(char c);
+
+char* trim_whitespace(char* str);
 
 /***********/
 /* paths.c */
@@ -85,8 +85,6 @@ void add_path_recursively(storage_t* storage, char* path, char* value);
 
 file_t* get_file_by_path(storage_t* storage, char* path);
 
-/* files */
-
 file_t* init_file(file_t* parent, char* name);
 
 void set_file_value(storage_t* storage, file_t* file, char* value);
@@ -95,9 +93,15 @@ list_t* get_file_children_by_creation(file_t* parent);
 
 file_t* get_child_by_name(file_t* parent, char* name);
 
-void destroy_file(storage_t* storage, file_t* file);
+void destroy_file(void* storage, void* file);
 
 void delete_file(storage_t* storage, file_t* file);
+
+void print_files_recursively(void* data, void* value);
+
+void print_file_path(file_t* file);
+
+void print_file_tree(link_t* link);
 
 /* auxiliaries */
 
@@ -106,15 +110,5 @@ char* get_file_name(void* file);
 char* get_file_value(void* file);
 
 void print_file_name(void* file);
-
-void destroy_file_aux(void* data, void* value);
-
-/***********/
-/* utils.c */
-/***********/
-
-short is_whitespace(char c);
-
-char* trim_whitespace(char* str);
 
 #endif

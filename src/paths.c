@@ -68,7 +68,7 @@ file_t* get_file_by_path(storage_t* storage, char* path) {
  * Returns the newly allocated file.
  */
 file_t* init_file(file_t* parent, char* name) {
-	file_t* new_file = (file_t*)malloc(sizeof(file_t));
+	file_t* new_file = (file_t*)safe_malloc(sizeof(file_t));
 
 	new_file->parent = parent;
 	new_file->children_by_creation = NULL;
@@ -77,7 +77,7 @@ file_t* init_file(file_t* parent, char* name) {
 
 	/* the file name can be NULL if it is the root file */
 	if (name != NULL) {
-		new_file->name = (char*)malloc(sizeof(char) * (strlen(name) + 1));
+		new_file->name = (char*)safe_malloc(sizeof(char) * (strlen(name) + 1));
 		strcpy(new_file->name, name);
 	} else {
 		new_file->name = NULL;
@@ -98,7 +98,7 @@ void set_file_value(storage_t* storage, file_t* file, char* value) {
 		free(file->value);
 	}
 
-	file->value = malloc(sizeof(char) * (strlen(value) + 1));
+	file->value = (char*)safe_malloc(sizeof(char) * (strlen(value) + 1));
 	strcpy(file->value, value);
 
 	storage->search_table =

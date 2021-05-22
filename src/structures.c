@@ -2,6 +2,7 @@
 
 #include "structures.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -36,7 +37,7 @@ struct hashtable {
  * Returns the newly created list.
  */
 list_t* init_list() {
-	list_t* new_list = (list_t*)malloc(sizeof(list_t));
+	list_t* new_list = (list_t*)safe_malloc(sizeof(list_t));
 	new_list->first = NULL;
 	new_list->last = NULL;
 	return new_list;
@@ -47,7 +48,7 @@ list_t* init_list() {
  * as the last element.
  */
 void insert_list(list_t* list, void* item) {
-	node_t* node = (node_t*)malloc(sizeof(node_t));
+	node_t* node = (node_t*)safe_malloc(sizeof(node_t));
 
 	node->value = item;
 
@@ -72,7 +73,6 @@ void destroy_list(list_t* list) {
 		node_t* aux = next;
 		next = aux->next;
 
-		/* TODO destroy_file(storage, aux->value);*/
 		free(aux);
 	}
 
@@ -118,7 +118,7 @@ void traverse_list(list_t* list, void* data,
  * Returns the newly created link.
  */
 link_t* init_link(void* value, link_t* left, link_t* right) {
-	link_t* new_link = (link_t*)malloc(sizeof(link_t));
+	link_t* new_link = (link_t*)safe_malloc(sizeof(link_t));
 
 	new_link->value = value;
 	new_link->left = left;
@@ -353,9 +353,9 @@ int hash_string(char* v, int size) {
  * Returns a pointer to the newly created hashtable.
  */
 hashtable_t* init_hashtable(int size) {
-	hashtable_t* hashtable = (hashtable_t*)malloc(sizeof(hashtable_t));
+	hashtable_t* hashtable = (hashtable_t*)safe_malloc(sizeof(hashtable_t));
 	int i;
-	void** table = (void**)malloc(sizeof(void*) * size);
+	void** table = (void**)safe_malloc(sizeof(void*) * size);
 
 	hashtable->table = table;
 	hashtable->size = size;
@@ -466,4 +466,13 @@ void swap_variables(void** a, void** b) {
 	void* c = *a;
 	*a = *b;
 	*b = c;
+}
+
+void* safe_malloc(unsigned int size) {
+	void* p = malloc(size);
+	if (p != NULL) return p;
+
+	printf(ERR_NO_MEMORY);
+	exit(EXIT_CODE_NO_MEMORY);
+	return NULL;
 }

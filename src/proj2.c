@@ -13,8 +13,8 @@
  * Ends the program by freeing all the used memory.
  */
 int main() {
-	storage_t *storage = (storage_t *)malloc(sizeof(storage_t));
-	char *command = malloc(sizeof(char) * MAX_COMMAND_SIZE);
+	storage_t *storage = (storage_t *)safe_malloc(sizeof(storage_t));
+	char *command = (char *)safe_malloc(sizeof(char) * MAX_COMMAND_SIZE);
 
 	storage->root_file = init_file(NULL, NULL);
 	storage->search_table = init_hashtable(HASHTABLE_START_SIZE);

@@ -3,6 +3,9 @@
 #ifndef _STRUCTURES_H_
 #define _STRUCTURES_H_
 
+#define ERR_NO_MEMORY "No memory.\n"
+#define EXIT_CODE_NO_MEMORY -1
+
 #define HASHTABLE_START_SIZE 7
 
 typedef struct node node_t;
@@ -75,5 +78,7 @@ hashtable_t* expand_hashtable(hashtable_t* hashtable, char* (*key)(void*));
 /* utils */
 
 void swap_variables(void** a, void** b);
+
+void* safe_malloc(unsigned int size);
 
 #endif

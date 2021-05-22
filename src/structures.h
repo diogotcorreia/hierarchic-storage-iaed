@@ -72,4 +72,8 @@ void destroy_hashtable(hashtable_t* hashtable);
 
 hashtable_t* expand_hashtable(hashtable_t* hashtable, char* (*key)(void*));
 
+/* utils */
+
+void swap_variables(void** a, void** b);
+
 #endif

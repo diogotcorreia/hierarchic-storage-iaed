@@ -276,7 +276,6 @@ void destroy_tree(link_t* link) {
 	destroy_tree(link->left);
 	destroy_tree(link->right);
 
-	/* TODO support freeing the value itself? */
 	free(link);
 }
 
@@ -307,12 +306,7 @@ link_t* delete_link(link_t* link, char* value, char* (*key)(void*)) {
 	else {
 		if (link->left != NULL && link->right != NULL) {
 			link_t* aux = max_link(link->left);
-			{
-				/* TODO make this a function */
-				void* x = link->value;
-				link->value = aux->value;
-				aux->value = x;
-			}
+			swap_variables(&link->value, &aux->value);
 			link->left = delete_link(link->left, key(aux->value), key);
 		} else {
 			link_t* aux = link;
@@ -464,4 +458,12 @@ hashtable_t* expand_hashtable(hashtable_t* hashtable, char* (*key)(void*)) {
 	destroy_hashtable(hashtable);
 
 	return new_hashtable;
+}
+
+/* utils */
+
+void swap_variables(void** a, void** b) {
+	void* c = *a;
+	*a = *b;
+	*b = c;
 }

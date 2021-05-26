@@ -25,8 +25,8 @@ void destroy_list(list_t* list);
 
 void delete_node(list_t* list, void* value);
 
-void traverse_list(list_t* list, void* data,
-                   void (*fn)(void* data, void* value));
+void traverse_list_reverse(list_t* list, void* data,
+                           void (*fn)(void* data, void* value));
 
 /* trees */
 
@@ -55,7 +55,7 @@ link_t* max_link(link_t* link);
 
 link_t* delete_link(link_t* link, char* value, char* (*key)(void*));
 
-void traverse_tree(link_t* link, void (*fn)(void* value));
+void traverse_tree_reverse(link_t* link, void (*fn)(void* value));
 
 /* hashtables */
 

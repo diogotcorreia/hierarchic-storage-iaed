@@ -102,12 +102,12 @@ void delete_node(list_t* list, void* value) {
 	}
 }
 
-void traverse_list(list_t* list, void* data,
-                   void (*fn)(void* data, void* value)) {
-	node_t* aux = list->first;
+void traverse_list_reverse(list_t* list, void* data,
+                           void (*fn)(void* data, void* value)) {
+	node_t* aux = list->last;
 	while (aux != NULL) {
 		fn(data, aux->value);
-		aux = aux->next;
+		aux = aux->prev;
 	}
 }
 
@@ -324,12 +324,12 @@ link_t* delete_link(link_t* link, char* value, char* (*key)(void*)) {
 	return link;
 }
 
-void traverse_tree(link_t* link, void (*fn)(void* value)) {
+void traverse_tree_reverse(link_t* link, void (*fn)(void* value)) {
 	if (link == NULL) return;
 
-	traverse_tree(link->left, fn);
+	traverse_tree_reverse(link->right, fn);
 	fn(link->value);
-	traverse_tree(link->right, fn);
+	traverse_tree_reverse(link->left, fn);
 }
 
 /* Hashtable */

@@ -143,7 +143,7 @@ void destroy_file(void* storage, void* file) {
 	/* destroy all child files */
 
 	if (f->children_by_creation != NULL) {
-		traverse_list(f->children_by_creation, storage, destroy_file);
+		traverse_list_reverse(f->children_by_creation, storage, destroy_file);
 		destroy_list(f->children_by_creation);
 	}
 	if (f->children_tree != NULL) {
@@ -178,13 +178,13 @@ void delete_file(storage_t* storage, file_t* file) {
  */
 void print_files_recursively(void* data, void* value) {
 	file_t* file = (file_t*)value;
+	if (file->children_by_creation != NULL) {
+		traverse_list_reverse(file->children_by_creation, data,
+		                      print_files_recursively);
+	}
 	if (file->value != NULL) {
 		print_file_path(file);
 		printf(PATH_VALUE_FORMAT, file->value);
-	}
-	if (file->children_by_creation != NULL) {
-		traverse_list(file->children_by_creation, data,
-		              print_files_recursively);
 	}
 }
 
@@ -203,7 +203,7 @@ void print_file_path(file_t* file) {
  * in alphabetical order by traversing a binary tree.
  */
 void print_file_tree(link_t* link) {
-	traverse_tree(link, print_file_name);
+	traverse_tree_reverse(link, print_file_name);
 }
 
 /* Auxiliaries */
